@@ -1,0 +1,14 @@
+[% INCLUDE 'doc-head-open.inc' %]
+ <title>Koha: Tools: Patron Emailer</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a> &rsaquo; Patron Emailer &rsaquo; Emails queued</div>
+
+<div id="doc3">
+    Your emails have been scheduled for delivery!
+
+[% INCLUDE 'intranet-bottom.inc' %]
