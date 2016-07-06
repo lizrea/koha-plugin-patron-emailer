@@ -1,6 +1,6 @@
 package Koha::Plugin::Com::ByWaterSolutions::PatronEmailer;
 
-## It's good practive to use Modern::Perl
+## It's good practice to use Modern::Perl
 use Modern::Perl;
 
 ## Required for all plugins
