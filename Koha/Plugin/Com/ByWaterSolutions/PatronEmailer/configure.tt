@@ -32,6 +32,12 @@
             <textarea rows="15" cols="200" name="body">[% body %]</textarea>
         </p>
 
+        <p>
+            <label for="delimiter">Data delimiter: </label>
+            <br/>
+            <input name="delimiter" type="text" value=","/>
+        </p>
+
         <p>This plugin uses Template Toolkit syntax. All the fields in the uploaded CSV file will be available.</p>
 
         <p>Example:</p>

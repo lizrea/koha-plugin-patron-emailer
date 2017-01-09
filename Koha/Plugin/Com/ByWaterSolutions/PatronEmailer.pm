@@ -106,7 +106,8 @@ sub tool_step2 {
     my $csv_contents;
     open my $fh_out, '>', \$csv_contents or die "Can't open variable: $!";
 
-    my $csv = Text::CSV->new( { binary => 1 } )
+    my $delimiter = $self->retrieve_data('delimiter');
+    my $csv = Text::CSV->new( { binary => 1, sep_char => $delimiter } )
       or die "Cannot use CSV: " . Text::CSV->error_diag();
 
     my $upload_dir        = '/tmp';
@@ -171,8 +172,9 @@ sub configure {
         my $template = $self->get_template( { file => 'configure.tt' } );
 
         ## Grab the values we already have for our settings, if any exist
-        $template->param( body    => $self->retrieve_data('body'), );
-        $template->param( subject => $self->retrieve_data('subject'), );
+        $template->param( body      => $self->retrieve_data('body'), );
+        $template->param( subject   => $self->retrieve_data('subject'), );
+        $template->param( delimiter => $self->retrieve_data('delimiter'), );
 
         print $cgi->header();
         print $template->output();
@@ -182,6 +184,7 @@ sub configure {
             {
                 body               => $cgi->param('body'),
                 subject            => $cgi->param('subject'),
+                delimiter          => $cgi->param('delimiter'),
                 last_configured_by => C4::Context->userenv->{'number'},
             }
         );
