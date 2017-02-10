@@ -35,7 +35,7 @@
         <p>
             <label for="delimiter">Data delimiter: </label>
             <br/>
-            <input name="delimiter" type="text" value=","/>
+            <input name="delimiter" type="text" value="[% delimiter %]"/>
         </p>
 
         <p>This plugin uses Template Toolkit syntax. All the fields in the uploaded CSV file will be available.</p>

@@ -170,11 +170,13 @@ sub configure {
 
     unless ( $cgi->param('save') ) {
         my $template = $self->get_template( { file => 'configure.tt' } );
+        my $delimiter = $self->retrieve_data('delimiter');
+        $delimiter = ',' if( ! defined($delimiter) || ! $delimiter );
 
         ## Grab the values we already have for our settings, if any exist
         $template->param( body      => $self->retrieve_data('body'), );
         $template->param( subject   => $self->retrieve_data('subject'), );
-        $template->param( delimiter => $self->retrieve_data('delimiter'), );
+        $template->param( delimiter => $delimiter, );
 
         print $cgi->header();
         print $template->output();
