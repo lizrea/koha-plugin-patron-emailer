@@ -3,13 +3,13 @@ This plugin takes a csv file containing patron information, and sends emails to 
 The CSV file must 
 
 - Start with a header line which names the columns used
-- Contain a column titled `borrowernumber` containing the borrower numbers of the patrons to be emailed.
+- Contain a column titled `cardnumber` containing the card numbers of the patrons to be emailed.
 
 When configuring the email, template tooklit syntax is used to display any column names in the csv file.
 
 For example, given the file 'Mailer-Report.csv':
 
-    borrowernumber, firstname, surname, fines, libraryname
+    cardnumber, firstname, surname, fines, libraryname
     10,Aaron,Spelling, 0.40, "The Spelling Schoool"
     11,"Donna Karen E",Moore, 3.80, "Motivation International"
     12,Bernice,Documents, -785.00, "Sarbanes Oxley"
