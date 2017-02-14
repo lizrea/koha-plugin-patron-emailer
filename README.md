@@ -17,13 +17,13 @@ For example, given the file 'Mailer-Report.csv':
 
 If you set the following email text under configuration:
 
-    Dear [% firstname %] [%surname%],
+    Dear [% firstname %] [% surname %],
 
     You have a balance of $[% fines %]
 
     Please pay these at [% libraryname %] 
 
-Then click the `Run Tool` link, you will be prompted to upload `Mailer-Report.csv`, which will send an email to each borrower in the file. 
+Then click the `Run Tool` link, you will be prompted to upload `Mailer-Report.csv`, which will send an email to each borrower in the file. Make sure that the variables being expanded (e.g. `[% firstname %]`) *exactly* match the column headers.
 
 For example, an email containing the following content would be sent to Aaron Spelling's email address: 
 
