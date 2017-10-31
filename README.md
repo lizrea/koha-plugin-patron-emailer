@@ -33,25 +33,26 @@ For example, an email containing the following content would be sent to Aaron Sp
 
     Please pay these at The Spelling Schoool
     
+===============================================
     DETAILED instructions on how to use plugin
 ===============================================
     
     To send the emails:
-1 - Run the desired report
-2 - Save the results as CSV
-Click 'Download->Comma separated text'
-Save the file on your computer
-3 - Run the plugin
-Browse to More->Tools->Tool plugins ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/plugins-home.pl?method=tool )
-Click Actions -> Configure ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/run.pl?class=Koha::Plugin::Com::ByWaterSolutions::PatronEmailer&method=configure )
-Ensure the message is setup as you wish
-Click Actions -> Run ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/run.pl?class=Koha::Plugin::Com::ByWaterSolutions::PatronEmailer&method=tool )
-Upload the CSV file you saved in step 2
-The emails will be sent
-4 - You can check on the emails sent by using the report here:
-http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/reports/guided_reports.pl?reports=150&phase=Run%20this%20report
-For example, giving the subject 'Fines are due' you can see the test I sent myself today (with your name)
-http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/reports/guided_reports.pl?reports=150&phase=Run+this+report&sql_params=Fines+are+due
+ 1 - Run the desired report
+ 2 - Save the results as CSV
+ Click 'Download->Comma separated text'
+ Save the file on your computer
+ 3 - Run the plugin
+ Browse to More->Tools->Tool plugins ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/plugins-home.pl?method=tool )
+ Click Actions -> Configure ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/run.pl? class=Koha::Plugin::Com::ByWaterSolutions::PatronEmailer&method=configure )
+ Ensure the message is setup as you wish
+ Click Actions -> Run ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/run.pl?class=Koha::Plugin::Com::ByWaterSolutions::PatronEmailer&method=tool )
+ Upload the CSV file you saved in step 2
+ The emails will be sent
+ 4 - You can check on the emails sent by using the report here:
+ http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/reports/guided_reports.pl?reports=150&phase=Run%20this%20report
+ For example, giving the subject 'Fines are due' you can see the test I sent myself today (with your name)
+ http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/reports/guided_reports.pl?reports=150&phase=Run+this+report&sql_params=Fines+are+due
 
 ============================================
 
