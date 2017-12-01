@@ -1,8 +1,8 @@
 {
-  "name": "koha-plugin-kitchen-sink",
+  "name": "koha-plugin-patron-emailer",
   "version": "2.1.9",
   "previous_version": "2.1.8",
-  "description": "Koha Kitchen Sink Plugin",
+  "description": "Koha Patron Emailer Plugin",
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-cli": "^1.2.2",
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bywatersolutions/koha-plugin-kitchen-sink.git"
+    "url": "git+https://github.com/bywatersolutions/koha-plugin-patron-emailer.git"
   },
   "author": "Kyle M Hall <kyle@bywatersolutions.com>",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/bywatersolutions/koha-plugin-kitchen-sink/issues"
+    "url": "https://github.com/bywatersolutions/koha-plugin-patron-emailer/issues"
   },
-  "homepage": "https://github.com/bywatersolutions/koha-plugin-kitchen-sink#readme",
+  "homepage": "https://github.com/bywatersolutions/koha-plugin-patron-emailer#readme",
   "dependencies": {
     "datetime": "0.0.3",
     "jsonfile": "^4.0.0",
