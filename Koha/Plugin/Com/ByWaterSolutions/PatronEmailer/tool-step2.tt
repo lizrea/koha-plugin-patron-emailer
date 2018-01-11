@@ -8,7 +8,55 @@
 
 <div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a> &rsaquo; Patron Emailer &rsaquo; Emails queued</div>
 
+[% IF ( not_found.size > 0 ) %]
+    <div class="dialog alert"><p>Warning, the following cardnumbers were not found:</p></div>
+    <table style="margin:auto;">
+        <thead>
+            <tr><th>Cardnumbers not found</th></tr>
+        </thead>
+        <tbody>
+            [% FOREACH nf IN not_found %]
+                <tr><td>[% nf |html %]</td></td>
+            [% END %]
+        </tbody>
+    </table>
+[% END %]
+[% IF ( sent) %]
 <div id="doc3">
-    Your emails have been scheduled for delivery!
+    Here is a preview of your emails:
+</div>
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="class" value="[% CLASS %]"/>
+    <input type="hidden" name="method" value="[% METHOD %]"/>
+    <input type="hidden" name="step3" value="step3"/>
+
+<table>
+    <thead>
+        <tr>
+        <th>Borrowernumber</th>
+        <th>Subject</th>
+        <th>Content</th>
+        <th>To</th>
+        <th>From</th>
+        </tr>
+    </thead>
+    <tbody>
+    [% FOREACH email IN sent %]
+        <tr>
+            <td>[% email.borrowernumber %]<input type="hidden" name="borrowernumber" value="[% email.borrowernumber %]" /></td>
+            <td>[% email.subject %]<input type="hidden" name="subject" value="[% email.subject %]" /></td>
+            <td>[% email.content %]<input type="hidden" name="content" value="[% email.content %]" /></td>
+            <td>[% email.to_address %]<input type="hidden" name="to_address" value="[% email.to_address %]" /></td>
+            <td>[% email.from_address %]<input type="hidden" name="from_address" value="[% email.from_address %]" /></td>
+        </tr>
+    [% END %]
+    </tbody>
+</table>
+  <input type="submit" value="Send emails"/>
+</form>
+[% END %]
+[% IF ( no_cardnumber ) %]
+<div class="dialog alert">You are missing the required column 'cardnumber', please upload a new file</div>
+[% END %]
 
 [% INCLUDE 'intranet-bottom.inc' %]

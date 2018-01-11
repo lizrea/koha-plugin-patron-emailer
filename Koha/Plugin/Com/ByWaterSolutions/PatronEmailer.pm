@@ -10,6 +10,7 @@ use File::Basename;
 use DateTime;
 use Text::CSV;
 use Koha::Database;
+use List::Util qw( any );
 
 use open qw(:utf8);
 
@@ -54,11 +55,13 @@ sub tool {
 
     my $cgi = $self->{'cgi'};
 
-    unless ( $cgi->param('patrons') ) {
-        $self->tool_step1();
-    }
-    else {
+    if ( $cgi->param('patrons') ) {
         $self->tool_step2();
+    }
+    elsif ( $cgi->param('step3') ){
+        $self->tool_step3();
+    } else {
+        $self->tool_step1();
     }
 
 }
@@ -95,13 +98,11 @@ sub tool_step1 {
 sub tool_step2 {
     my ( $self, $args ) = @_;
     my $cgi = $self->{'cgi'};
+    my $template = $self->get_template( { file => 'tool-step2.tt' } );
 
     my $filename = $cgi->param("patrons");
     warn "FILENAME: $filename";
     my ( $name, $path, $extension ) = fileparse( $filename, '.csv' );
-    warn "NAME: $name";
-    warn "PATH: $path";
-    warn "EXT: $extension";
 
     my $csv_contents;
     open my $fh_out, '>', \$csv_contents or die "Can't open variable: $!";
@@ -121,6 +122,13 @@ sub tool_step2 {
     open my $fh_in, '<', "$upload_dir/$filename" or die "Can't open variable: $!";
 
     my $column_names = $csv->getline($fh_in);
+    unless( any { $_ eq 'cardnumber' } @$column_names ){
+        close $fh_in;
+        $template->param( no_cardnumber => 1 );
+        print $cgi->header();
+        print $template->output();
+        return;
+    }
     $csv->column_names(@$column_names);
 
     my $body_template = $self->retrieve_data('body');
@@ -130,6 +138,8 @@ sub tool_step2 {
     my $borrowers_rs     = $schema->resultset('Borrower');
     my $message_queue_rs = $schema->resultset('MessageQueue');
 
+    my @not_found;
+    my @sent;
     while ( my $hr = $csv->getline_hr($fh_in) ) {
         my $template = Template->new();
 
@@ -137,25 +147,60 @@ sub tool_step2 {
         $template->process( \$body_template, $hr, \$body );
 
         my $borrower = $borrowers_rs->single( { cardnumber => $hr->{cardnumber} } );
-
-        $message_queue_rs->create(
-            {
-                borrowernumber         => $borrower->borrowernumber(),
-                subject                => $subject,
-                content                => $body,
-                message_transport_type => 'email',
-                status                 => 'pending',
-                to_address             => $hr->{email},
-                from_address           => C4::Context->preference('KohaAdminEmailAddress'),
-            }
-        );
+        if ( $borrower ) {
+            my $prepped_email =
+                {
+                    borrowernumber         => $borrower->borrowernumber(),
+                    subject                => $subject,
+                    content                => $body,
+                    message_transport_type => 'email',
+                    status                 => 'pending',
+                    to_address             => $hr->{email},
+                    from_address           => C4::Context->preference('KohaAdminEmailAddress'),
+                 };
+#            $message_queue_rs->create($prepped_email);
+            push @sent, $prepped_email;
+        } else {
+            push @not_found, $hr->{cardnumber};
+        }
     }
 
     $csv->eof or $csv->error_diag();
     close $fh_in;
 
-    my $template = $self->get_template( { file => 'tool-step2.tt' } );
+    $template->param(
+        not_found => \@not_found,
+        sent      => \@sent,
+    );
 
+    print $cgi->header();
+    print $template->output();
+}
+
+sub tool_step3 {
+    my ( $self, $args ) = @_;
+    my $cgi = $self->{'cgi'};
+    my $template = $self->get_template( { file => 'tool-step3.tt' } );
+    my @borrowernumber = $cgi->multi_param('borrowernumber');
+    my @subject= $cgi->multi_param('subject');
+    my @content = $cgi->multi_param('content');
+    my @to_address = $cgi->multi_param('to_address');
+    my @from_address = $cgi->multi_param('from_address');
+    my $schema           = Koha::Database->new()->schema();
+    my $message_queue_rs = $schema->resultset('MessageQueue');
+    for( my $i = 0; $i < @borrowernumber; $i++ ){
+        $message_queue_rs->create({
+            borrowernumber => $borrowernumber[$i],
+            subject => $subject[$i],
+            content => $content[$i],
+            message_transport_type => $to_address[$i] ne "" ? 'email' : 'print',
+            status => 'pending',
+            to_address => $to_address[$i],
+            from_address => $from_address[$i]
+        });
+
+    }
+    $template->param( sent => 1 );
     print $cgi->header();
     print $template->output();
 }
