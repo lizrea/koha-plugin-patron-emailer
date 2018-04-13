@@ -4,6 +4,7 @@ The CSV file must
 
 - Start with a header line which names the columns used
 - Contain a column titled `cardnumber` containing the card numbers of the patrons to be emailed.
+- Contain a column titled `email` containing the email addresses to be emailed
 
 When configuring the email, template toolkit syntax is used to display any column names in the csv file.
 
