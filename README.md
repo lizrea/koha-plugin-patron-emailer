@@ -41,14 +41,9 @@ To send the emails:
   * Click 'Download->Comma separated text'
   * Save the file on your computer
 * Run the plugin
-  * Browse to More->Tools->Tool plugins ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/plugins-home.pl?method=tool )
- * Click Actions -> Configure ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/run.pl? class=Koha::Plugin::Com::ByWaterSolutions::PatronEmailer&method=configure )
+ * Browse to More->Tools->Tool plugins
+ * Click Actions -> Configure 
  * Ensure the message is setup as you wish
- * Click Actions -> Run ( http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/plugins/run.pl?class=Koha::Plugin::Com::ByWaterSolutions::PatronEmailer&method=tool )
+ * Click Actions -> Run 
  * Upload the CSV file you saved in step 2
- * You can check on the emails sent by using the report here:
-   * http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/reports/guided_reports.pl?reports=150&phase=Run%20this%20report
-   * For example, giving the subject 'Fines are due' you can see the test I sent myself today (with your name)
-   * http://xxx.xxx.bywatersolutions.com/cgi-bin/koha/reports/guided_reports.pl?reports=150&phase=Run+this+report&sql_params=Fines+are+due
-
 
