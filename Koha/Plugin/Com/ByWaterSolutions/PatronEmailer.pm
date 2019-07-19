@@ -147,6 +147,8 @@ sub tool_step2 {
         $template->process( \$body_template, $hr, \$body );
 
         my $borrower = $borrowers_rs->single( { cardnumber => $hr->{cardnumber} } );
+        next unless $borrower;
+
         if ( $borrower ) {
             my $prepped_email =
                 {
