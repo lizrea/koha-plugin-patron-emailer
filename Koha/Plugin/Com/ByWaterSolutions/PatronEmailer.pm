@@ -10,7 +10,11 @@ use File::Basename;
 use DateTime;
 use Text::CSV;
 use Koha::Database;
+use Koha::Notice::Templates;
+use Koha::Patrons;
+use Koha::Reports;
 use List::Util qw( any );
+use C4::Reports::Guided qw( execute_query );
 
 use open qw(:utf8);
 
@@ -55,7 +59,7 @@ sub tool {
 
     my $cgi = $self->{'cgi'};
 
-    if ( $cgi->param('patrons') ) {
+    if ( $cgi->param('patrons') || $cgi->param('report_id') ) {
         $self->tool_step2();
     }
     elsif ( $cgi->param('step3') ){
@@ -90,6 +94,9 @@ sub tool_step1 {
     my $cgi = $self->{'cgi'};
 
     my $template = $self->get_template( { file => 'tool-step1.tt' } );
+    my $letters = Koha::Notice::Templates->search( {}, { order_by=>['me.branchcode','me.module','me.name'] } );
+    my $subject = $self->retrieve_data('subject');
+    $template->param( letters => $letters, subject => $subject );
 
     print $cgi->header();
     print $template->output();
@@ -100,83 +107,121 @@ sub tool_step2 {
     my $cgi = $self->{'cgi'};
     my $template = $self->get_template( { file => 'tool-step2.tt' } );
 
-    my $filename = $cgi->param("patrons");
-    warn "FILENAME: $filename";
-    my ( $name, $path, $extension ) = fileparse( $filename, '.csv' );
 
-    my $csv_contents;
-    open my $fh_out, '>', \$csv_contents or die "Can't open variable: $!";
-
-    my $delimiter = $self->retrieve_data('delimiter');
-    my $csv = Text::CSV->new( { binary => 1, sep_char => $delimiter } )
-      or die "Cannot use CSV: " . Text::CSV->error_diag();
-
-    my $upload_dir        = '/tmp';
-    my $upload_filehandle = $cgi->upload("patrons");
-    open( UPLOADFILE, '>', "$upload_dir/$filename" ) or die "$!";
-    binmode UPLOADFILE;
-    while (<$upload_filehandle>) {
-        print UPLOADFILE;
+    my ( $body_template, $subject );
+    if( $cgi->param('use_built_in') ){
+        $body_template = $self->retrieve_data('body');
+        $subject       = $self->retrieve_data('subject');
+    } else {
+        my $branchcode = $cgi->param("branchcode");
+        my $module = $cgi->param("module");
+        my $letter = $cgi->param("letter");
+        warn " $branchcode and $module and $letter ";
+        my $notice = Koha::Notice::Templates->find({ branchcode => $branchcode, module => $module, code => $letter });
+        $body_template = $notice->content;
+        $subject       = $notice->title;
     }
-    close UPLOADFILE;
-    open my $fh_in, '<', "$upload_dir/$filename" or die "Can't open variable: $!";
-
-    my $column_names = $csv->getline($fh_in);
-    unless( any { $_ eq 'cardnumber' } @$column_names ){
-        close $fh_in;
-        $template->param( no_cardnumber => 1 );
-        print $cgi->header();
-        print $template->output();
-        return;
-    }
-    $csv->column_names(@$column_names);
-
-    my $body_template = $self->retrieve_data('body');
-    my $subject       = $self->retrieve_data('subject');
-
-    my $schema           = Koha::Database->new()->schema();
-    my $borrowers_rs     = $schema->resultset('Borrower');
-    my $message_queue_rs = $schema->resultset('MessageQueue');
 
     my @not_found;
-    my @sent;
-    while ( my $hr = $csv->getline_hr($fh_in) ) {
-        my $template = Template->new();
+    my @to_send;
 
-        my $body;
-        $template->process( \$body_template, $hr, \$body );
+    my $filename = $cgi->param("patrons");
+    if( $filename ){
+        my ( $name, $path, $extension ) = fileparse( $filename, '.csv' );
 
-        my $borrower = $borrowers_rs->single( { cardnumber => $hr->{cardnumber} } );
-        next unless $borrower;
+        my $csv_contents;
+        open my $fh_out, '>', \$csv_contents or die "Can't open variable: $!";
 
-        if ( $borrower ) {
-            my $prepped_email =
-                {
-                    borrowernumber         => $borrower->borrowernumber(),
-                    subject                => $subject,
-                    content                => $body,
-                    message_transport_type => 'email',
-                    status                 => 'pending',
-                    to_address             => $hr->{email},
-                    from_address           => C4::Context->preference('KohaAdminEmailAddress'),
-                 };
-#            $message_queue_rs->create($prepped_email);
-            push @sent, $prepped_email;
-        } else {
-            push @not_found, $hr->{cardnumber};
+        my $delimiter = $self->retrieve_data('delimiter');
+        my $csv = Text::CSV->new( { binary => 1, sep_char => $delimiter } )
+          or die "Cannot use CSV: " . Text::CSV->error_diag();
+
+        my $upload_dir        = '/tmp';
+        my $upload_filehandle = $cgi->upload("patrons");
+        open( UPLOADFILE, '>', "$upload_dir/$filename" ) or die "$!";
+        binmode UPLOADFILE;
+        while (<$upload_filehandle>) {
+            print UPLOADFILE;
+        }
+        close UPLOADFILE;
+        open my $fh_in, '<', "$upload_dir/$filename" or die "Can't open variable: $!";
+
+        my $column_names = $csv->getline($fh_in);
+        unless( any { $_ eq 'cardnumber' } @$column_names ){
+            close $fh_in;
+            $template->param( no_cardnumber => 1 );
+            print $cgi->header();
+            print $template->output();
+            return;
+        }
+        $csv->column_names(@$column_names);
+
+        while ( my $hr = $csv->getline_hr($fh_in) ) {
+            my $email = generate_email($hr, $body_template,$subject);
+            if( $email ){
+                push @to_send, $email;
+            } else {
+                push @not_found, $hr->{cardnumber};
+            }
+        }
+        $csv->eof or $csv->error_diag();
+        close $fh_in;
+
+    } else {
+        my $report_id = $cgi->param("report_id");
+        my $report = Koha::Reports->find( $report_id );
+        my $sql = $report->savedsql;
+        my ( $sth, $errors ) = execute_query( $sql ); #don't pass offset or limit, hardcoded limit of 999,999 will be used
+        while ( my $row = $sth->fetchrow_hashref() ) {
+            unless( defined $row->{'cardnumber'} ){
+                $template->param( no_cardnumber => 1 );
+                print $cgi->header();
+                print $template->output();
+                return;
+            }
+            my $email = generate_email($row, $body_template,$subject);
+            if( $email ){
+                push @to_send, $email;
+            } else {
+                push @not_found, $row->{cardnumber};
+            }
         }
     }
 
-    $csv->eof or $csv->error_diag();
-    close $fh_in;
 
     $template->param(
         not_found => \@not_found,
-        sent      => \@sent,
+        sent      => \@to_send,
     );
 
     print $cgi->header();
     print $template->output();
+}
+
+sub generate_email {
+    my $line = shift;
+    my $body_template = shift;
+    my $subject = shift;
+
+    my $template = Template->new();
+
+    my $body;
+    $template->process( \$body_template, $line, \$body );
+
+    my $borrower = Koha::Patrons->find( { cardnumber => $line->{cardnumber} } );
+    return unless $borrower;
+
+    my $prepped_email =
+        {
+            borrowernumber         => $borrower->borrowernumber(),
+            subject                => $subject,
+            content                => $body,
+            message_transport_type => 'email',
+            status                 => 'pending',
+            to_address             => $line->{email},
+            from_address           => $line->{from} || C4::Context->preference('KohaAdminEmailAddress'),
+         };
+    return $prepped_email;
 }
 
 sub tool_step3 {
@@ -231,9 +276,9 @@ sub configure {
     else {
         $self->store_data(
             {
-                body               => $cgi->param('body'),
-                subject            => $cgi->param('subject'),
-                delimiter          => $cgi->param('delimiter'),
+                body               => $cgi->param('body')|| "",
+                subject            => $cgi->param('subject') || "",
+                delimiter          => $cgi->param('delimiter') || "",
                 last_configured_by => C4::Context->userenv->{'number'},
             }
         );
