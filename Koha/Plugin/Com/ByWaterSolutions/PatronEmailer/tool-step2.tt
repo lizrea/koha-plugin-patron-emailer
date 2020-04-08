@@ -26,9 +26,10 @@
     Here is a preview of your emails:
 </div>
 <form method="post" enctype="multipart/form-data">
-    <input type="hidden" name="class" value="[% CLASS %]"/>
-    <input type="hidden" name="method" value="[% METHOD %]"/>
+    <input type="hidden" name="class" value="[% CLASS | html %]"/>
+    <input type="hidden" name="method" value="[% METHOD | html %]"/>
     <input type="hidden" name="step3" value="step3"/>
+    <input type="hidden" name="letter_code" value="[% letter_code | html %]"/>
 
 <table>
     <thead>
@@ -43,11 +44,11 @@
     <tbody>
     [% FOREACH email IN sent %]
         <tr>
-            <td>[% email.borrowernumber %]<input type="hidden" name="borrowernumber" value="[% email.borrowernumber %]" /></td>
-            <td>[% email.subject %]<input type="hidden" name="subject" value="[% email.subject %]" /></td>
-            <td>[% email.content %]<input type="hidden" name="content" value="[% email.content %]" /></td>
-            <td>[% email.to_address %]<input type="hidden" name="to_address" value="[% email.to_address %]" /></td>
-            <td>[% email.from_address %]<input type="hidden" name="from_address" value="[% email.from_address %]" /></td>
+            <td>[% email.borrowernumber | html %]<input type="hidden" name="borrowernumber" value="[% email.borrowernumber | html %]" /></td>
+            <td>[% email.subject | html %]<input type="hidden" name="subject" value="[% email.subject | html %]" /></td>
+            <td>[% email.content | html %]<input type="hidden" name="content" value="[% email.content | html %]" /></td>
+            <td>[% email.to_address | html %]<input type="hidden" name="to_address" value="[% email.to_address | html %]" /></td>
+            <td>[% email.from_address | html %]<input type="hidden" name="from_address" value="[% email.from_address | html %]" /></td>
         </tr>
     [% END %]
     </tbody>

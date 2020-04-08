@@ -14,8 +14,8 @@
     <p>Please upload your Koha patrons CSV File</p>
 
     <form id="emailer_settings" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="class" value="[% CLASS %]"/>
-        <input type="hidden" name="method" value="[% METHOD %]"/>
+        <input type="hidden" name="class" value="[% CLASS | html %]"/>
+        <input type="hidden" name="method" value="[% METHOD | html %]"/>
         
         <fieldset id="data">
              <legend>Patrons to email</legend>
@@ -34,7 +34,7 @@
             <legend>Select a notice</legend>
             [% IF (subject) %]
                 <label for="use_built_in">Use notice configured in plugin</label>
-                <input id="use_built_in" type="checkbox" name="use_built_in">( [% subject %] )
+                <input id="use_built_in" type="checkbox" name="use_built_in">( [% subject | html %] )
                 </br>
                 or
                 </br>

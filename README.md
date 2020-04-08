@@ -1,10 +1,14 @@
-This plugin takes a csv file containing patron information, and sends emails to the patrons based on the fields in the CSV file and a template specified in the tool configuration.
+This plugin takes a csv file containing patron information or a koha report and sends emails to the patrons based on the fields in the data.
+
+You can choose to specify a template in the tool configuration or use an existing Koha notice.
+
+The plugin will record the letter code in the database as "PEP\_" + letter code  or "PEP_BUILT_IN" for a notice specified in the tool
 
 The CSV file must 
 
 - Start with a header line which names the columns used
 - Contain a column titled `cardnumber` containing the card numbers of the patrons to be emailed.
-- Contain a column titled `email` containing the email addresses to be emailed
+- Contain a column titled `email` containing the email addresses to be emailed ( if a patron has no email the letter will be queued as a print notice'
 
 When configuring the email, template toolkit syntax is used to display any column names in the csv file.
 

@@ -16,26 +16,26 @@
     <!-- Notice our form here has no 'action', this is good, it means that our forms will always get passed back to 'plugins/run.pl'. You could hard code it instead if you prefer -->
     <form method="get">
         <!-- Always pass these two parameters so the plugin system knows what to execute! -->
-        <input type="hidden" name="class" value="[% CLASS %]"/>
-        <input type="hidden" name="method" value="[% METHOD %]"/>
+        <input type="hidden" name="class" value="[% CLASS | html %]"/>
+        <input type="hidden" name="method" value="[% METHOD | html %]"/>
 
-        [% IF error %]<div class="warn alert error">Error: [% error %]</div>[% END %]
+        [% IF error %]<div class="warn alert error">Error: [% error | html %]</div>[% END %]
 
         <p>
             <label for="subject">Email subject: </label>
-            <input name="subject" type="text" class="input-xxlarge" size="100" value="[% subject %]" />
+            <input name="subject" type="text" class="input-xxlarge" size="100" value="[% subject | html %]" />
         </p>
 
         <p>
             <label for="body">Email text: </label>
             <br/>
-            <textarea rows="15" cols="200" name="body">[% body %]</textarea>
+            <textarea rows="15" cols="200" name="body">[% body | html %]</textarea>
         </p>
 
         <p>
             <label for="delimiter">Data delimiter: </label>
             <br/>
-            <input name="delimiter" type="text" value="[% delimiter %]"/>
+            <input name="delimiter" type="text" value="[% delimiter | html %]"/>
         </p>
 
         <p>This plugin uses Template Toolkit syntax. All the fields in the uploaded CSV file will be available.</p>

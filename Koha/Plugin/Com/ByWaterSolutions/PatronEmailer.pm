@@ -108,10 +108,11 @@ sub tool_step2 {
     my $template = $self->get_template( { file => 'tool-step2.tt' } );
 
 
-    my ( $body_template, $subject );
+    my ( $body_template, $subject, $letter_code );
     if( $cgi->param('use_built_in') ){
         $body_template = $self->retrieve_data('body');
         $subject       = $self->retrieve_data('subject');
+        $letter_code   = "BUILT_IN";
     } else {
         my $branchcode = $cgi->param("branchcode");
         my $module = $cgi->param("module");
@@ -120,6 +121,7 @@ sub tool_step2 {
         my $notice = Koha::Notice::Templates->find({ branchcode => $branchcode, module => $module, code => $letter });
         $body_template = $notice->content;
         $subject       = $notice->title;
+        $letter_code   = $notice->code;
     }
 
     my @not_found;
@@ -192,6 +194,7 @@ sub tool_step2 {
     $template->param(
         not_found => \@not_found,
         sent      => \@to_send,
+        letter_code => 'PEP_' . $letter_code,
     );
 
     print $cgi->header();
@@ -235,6 +238,7 @@ sub tool_step3 {
     my @from_address = $cgi->multi_param('from_address');
     my $schema           = Koha::Database->new()->schema();
     my $message_queue_rs = $schema->resultset('MessageQueue');
+    my $letter_code = $cgi->param('letter_code');
     for( my $i = 0; $i < @borrowernumber; $i++ ){
         $message_queue_rs->create({
             borrowernumber => $borrowernumber[$i],
@@ -243,7 +247,8 @@ sub tool_step3 {
             message_transport_type => $to_address[$i] ne "" ? 'email' : 'print',
             status => 'pending',
             to_address => $to_address[$i],
-            from_address => $from_address[$i]
+            from_address => $from_address[$i],
+            letter_code => $letter_code || 'PEP'
         });
 
     }
