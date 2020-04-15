@@ -16,6 +16,9 @@ use Koha::Reports;
 use List::Util qw( any );
 use C4::Reports::Guided qw( execute_query );
 
+use Template;
+use utf8;
+
 use open qw(:utf8);
 
 ## Here we set our plugin version
@@ -98,7 +101,7 @@ sub tool_step1 {
     my $subject = $self->retrieve_data('subject');
     $template->param( letters => $letters, subject => $subject );
 
-    print $cgi->header();
+    print $cgi->header("text/html;charset=UTF-8");
     print $template->output();
 }
 
@@ -152,7 +155,7 @@ sub tool_step2 {
         unless( any { $_ eq 'cardnumber' } @$column_names ){
             close $fh_in;
             $template->param( no_cardnumber => 1 );
-            print $cgi->header();
+            print $cgi->header("text/html;charset=UTF-8");
             print $template->output();
             return;
         }
@@ -177,7 +180,7 @@ sub tool_step2 {
         while ( my $row = $sth->fetchrow_hashref() ) {
             unless( defined $row->{'cardnumber'} ){
                 $template->param( no_cardnumber => 1 );
-                print $cgi->header();
+                print $cgi->header("text/html;charset=UTF-8");
                 print $template->output();
                 return;
             }
@@ -197,7 +200,7 @@ sub tool_step2 {
         letter_code => 'PEP_' . $letter_code,
     );
 
-    print $cgi->header();
+    print $cgi->header("text/html;charset=UTF-8");
     print $template->output();
 }
 
@@ -206,7 +209,7 @@ sub generate_email {
     my $body_template = shift;
     my $subject = shift;
 
-    my $template = Template->new();
+    my $template = Template->new({ENCODING => 'utf8'});
 
     my $body;
     $template->process( \$body_template, $line, \$body );
@@ -253,7 +256,7 @@ sub tool_step3 {
 
     }
     $template->param( sent => 1 );
-    print $cgi->header();
+    print $cgi->header("text/html;charset=UTF-8");
     print $template->output();
 }
 
@@ -275,7 +278,7 @@ sub configure {
         $template->param( subject   => $self->retrieve_data('subject'), );
         $template->param( delimiter => $delimiter, );
 
-        print $cgi->header();
+        print $cgi->header("text/html;charset=UTF-8");
         print $template->output();
     }
     else {
