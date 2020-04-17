@@ -1,3 +1,4 @@
+[% USE raw %]
 [% INCLUDE 'doc-head-open.inc' %]
  <title>Koha: Tools: Patron Emailer</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -30,6 +31,7 @@
     <input type="hidden" name="method" value="[% METHOD | html %]"/>
     <input type="hidden" name="step3" value="step3"/>
     <input type="hidden" name="letter_code" value="[% letter_code | html %]"/>
+    <input type="hidden" name="is_html" value="[% is_html | html %]"/>
 
 <table>
     <thead>
@@ -46,7 +48,7 @@
         <tr>
             <td>[% email.borrowernumber | html %]<input type="hidden" name="borrowernumber" value="[% email.borrowernumber | html %]" /></td>
             <td>[% email.subject | html %]<input type="hidden" name="subject" value="[% email.subject | html %]" /></td>
-            <td>[% email.content | html %]<input type="hidden" name="content" value="[% email.content | html %]" /></td>
+            <td>[% email.content | $raw %]<input type="hidden" name="content" value="[% email.content | $raw %]" /></td>
             <td>[% email.to_address | html %]<input type="hidden" name="to_address" value="[% email.to_address | html %]" /></td>
             <td>[% email.from_address | html %]<input type="hidden" name="from_address" value="[% email.from_address | html %]" /></td>
         </tr>

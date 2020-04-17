@@ -111,10 +111,11 @@ sub tool_step2 {
     my $template = $self->get_template( { file => 'tool-step2.tt' } );
 
 
-    my ( $body_template, $subject, $letter_code );
+    my ( $body_template, $subject, $letter_code, $is_html );
     if( $cgi->param('use_built_in') ){
         $body_template = $self->retrieve_data('body');
         $subject       = $self->retrieve_data('subject');
+        $is_html       = $self->retrieve_data('is_html');
         $letter_code   = "BUILT_IN";
     } else {
         my $branchcode = $cgi->param("branchcode");
@@ -125,6 +126,7 @@ sub tool_step2 {
         $body_template = $notice->content;
         $subject       = $notice->title;
         $letter_code   = $notice->code;
+        $is_html       = $notice->is_html;
     }
 
     my @not_found;
@@ -197,6 +199,7 @@ sub tool_step2 {
     $template->param(
         not_found => \@not_found,
         sent      => \@to_send,
+        is_html   => $is_html,
         letter_code => 'PEP_' . $letter_code,
     );
 
@@ -242,11 +245,12 @@ sub tool_step3 {
     my $schema           = Koha::Database->new()->schema();
     my $message_queue_rs = $schema->resultset('MessageQueue');
     my $letter_code = $cgi->param('letter_code');
+    my $is_html = $cgi->param('is_html');
     for( my $i = 0; $i < @borrowernumber; $i++ ){
         $message_queue_rs->create({
             borrowernumber => $borrowernumber[$i],
             subject => $subject[$i],
-            content => $content[$i],
+            content => $is_html ? _wrap_html($subject[$i],$content[$i]) : $content[$i],
             message_transport_type => $to_address[$i] ne "" ? 'email' : 'print',
             status => 'pending',
             to_address => $to_address[$i],
@@ -276,6 +280,7 @@ sub configure {
         ## Grab the values we already have for our settings, if any exist
         $template->param( body      => $self->retrieve_data('body'), );
         $template->param( subject   => $self->retrieve_data('subject'), );
+        $template->param( is_html   => $self->retrieve_data('is_html'), );
         $template->param( delimiter => $delimiter, );
 
         print $cgi->header("text/html;charset=UTF-8");
@@ -287,6 +292,7 @@ sub configure {
                 body               => $cgi->param('body')|| "",
                 subject            => $cgi->param('subject') || "",
                 delimiter          => $cgi->param('delimiter') || "",
+                is_html            => $cgi->param('is_html') || "",
                 last_configured_by => C4::Context->userenv->{'number'},
             }
         );
@@ -294,5 +300,28 @@ sub configure {
 
     $self->go_home();
 }
+
+sub _wrap_html {
+    my ($content, $title) = @_;
+
+    my $css = C4::Context->preference("NoticeCSS") || '';
+    $css = qq{<link rel="stylesheet" type="text/css" href="$css">} if $css;
+    return <<EOS;
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>$title</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+$css
+</head>
+<body>
+$content
+</body>
+</html>
+EOS
+}
+
+
 
 1;

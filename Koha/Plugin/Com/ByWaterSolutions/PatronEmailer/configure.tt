@@ -22,6 +22,17 @@
         [% IF error %]<div class="warn alert error">Error: [% error | html %]</div>[% END %]
 
         <p>
+            <label for="is_html">HTML message: </label>
+            [% IF (is_html) %]
+                <input name="is_html" type="checkbox" value="1" checked="checked"/>
+            [% ELSE %]
+                <input name="is_html" type="checkbox" value="1" />
+            [% END %]
+
+        </p>
+          
+
+        <p>
             <label for="subject">Email subject: </label>
             <input name="subject" type="text" class="input-xxlarge" size="100" value="[% subject | html %]" />
         </p>
