@@ -250,7 +250,7 @@ sub tool_step3 {
         $message_queue_rs->create({
             borrowernumber => $borrowernumber[$i],
             subject => $subject[$i],
-            content => $is_html ? _wrap_html($subject[$i],$content[$i]) : $content[$i],
+            content => $is_html ? _wrap_html($content[$i],$subject[$i]) : $content[$i],
             message_transport_type => $to_address[$i] ne "" ? 'email' : 'print',
             status => 'pending',
             to_address => $to_address[$i],
