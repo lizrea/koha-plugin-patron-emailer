@@ -49,17 +49,18 @@
 
             <label for="module">Choose a module</label>
             <select id="module" name="module">
-                <option value="acquisition">Acquisitions</option>
-                <option value="catalogue">Catalogue</option>
-                <option value="circulation">Circulation</option>
-                <option value="claimacquisition">Acquisition Claims</option>
-                <option value="claimissues">Claim serial issue</option>
-                <option value="reserves">Holds</option>
-                <option value="orderacquisition">Order acquisition</option>
-                <option value="members">Patrons</option>
-                <option value="serial">Serials (new issue)</option>
-                <option value="suggestions">Suggestions</option>
-                <option value="pos">Point of sale</option>
+                <option value="" data-text="All modules">All modules</option>
+                <option value="acquisition" data-text="Acquisitions">Acquisitions</option>
+                <option value="catalogue" data-text="Catalogue">Catalogue</option>
+                <option value="circulation" data-text="Circulation">Circulation</option>
+                <option value="claimacquisition" data-text="Acquisition Claims">Acquisition Claims</option>
+                <option value="claimissues" data-text="Claim serial issue">Claim serial issue</option>
+                <option value="reserves" data-text="Holds">Holds</option>
+                <option value="orderacquisition" data-text="Order acquisition">Order acquisition</option>
+                <option value="members" data-text="Patrons">Patrons</option>
+                <option value="serial" data-text="Serials (new issue)">Serials (new issue)</option>
+                <option value="suggestions" data-text="Suggestions">Suggestions</option>
+                <option value="pos" data-text="Point of sale">Point of sale</option>
             </select>
             </br>
            
@@ -67,7 +68,7 @@
             <select id="letter" name="letter">
                 <option value="">Please choose a letter</option>
                 [% FOREACH letter IN letters %]
-                    <option style="display:none;" data-branch="[% letter.branchcode | html %]" data-module="[% letter.module | html %]" value="[% letter.code | html %]">[% letter.name | html %]</option>
+                    <option data-branch="[% letter.branchcode | html %]" data-module="[% letter.module | html %]" value="[% letter.code | html %]">[% letter.name | html %] ( [% Branches.GetName(letter.branchcode) || "All" | html %] | [% letter.module %] ) </option>
                 [% END %]
             </select>
             </br>
@@ -78,13 +79,37 @@
 [% MACRO jsinclude BLOCK %]
     <script>
         $(document).ready(function(){
+            $("#branchcode option").each(function(){
+                 let branch_count = $("option[data-branch='"+$(this).val()+"']").length;
+                 $(this).text($(this).text()+" ("+branch_count+")");
+                 if( !branch_count ){ $(this).prop('disabled',true); }
+            });
+            module_count("");
+
             $("#branchcode,#module").on('change',function(){
                  let current_branch = $("#branchcode").val();
                  let current_module = $("#module").val();
+                 if( current_branch != "" ){ current_branch = '[data-branch="'+current_branch+'"]'; }
+                 if( current_module != "" ){ current_module = '[data-module="'+current_module+'"]'; }
+                 module_count( current_branch );
                  $('#letter option').hide();
                  $('#letter').val("");
-                 $('#letter option[data-branch="' + current_branch + '"][data-module="' + current_module + '"]').show();
+                 $('#letter option'+ current_branch + current_module).show();
             });
+
+            function module_count(current_branch){
+                $("#module option").each(function(){
+                  let current_module = $(this).val() ? '[data-module="'+$(this).val()+'"]' : "";
+                  let module_count = $("option"+current_branch+current_module).length;
+                  $(this).text($(this).data('text') +" ("+module_count+")");
+                  if( !module_count ){
+                      $(this).prop('disabled',true);
+                  } else {
+                      $(this).prop('disabled',false);
+                  }
+                });
+            }
+
             $("#emailer_settings").submit(function(e){
                 if( $("#letter").val() == "" && !$("#use_built_in").prop('checked') ){
                     e.preventDefault();
