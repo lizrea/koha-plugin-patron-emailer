@@ -1,0 +1,41 @@
+[% USE raw %]
+[% USE Koha %]
+[% USE KohaDates %]
+[% USE Branches %]
+[% USE Categories %]
+[% USE Price %]
+[% USE KohaNews %]
+[% PROCESS 'i18n.inc' %]
+[% SET OpacNavRight = KohaNews.get( location => "OpacNavRight", lang => lang, library => branchcode ) %]
+[% SET OpacMainUserBlock = KohaNews.get( location => "OpacMainUserBlock", lang => lang, library => branchcode ) %]
+[% SET OpacLoginInstructions = KohaNews.get( location => "OpacLoginInstructions", lang => lang, library => branchcode ) %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>[% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
+[% INCLUDE 'doc-head-close.inc' %]
+[% BLOCK cssinclude %][% END %]
+</head>
+[% INCLUDE 'bodytag.inc' bodyid='opac-main' %]
+[% INCLUDE 'masthead.inc' %]
+
+<div class="main">
+  <form action="/api/v1/contrib/patronemailer/patrons/unsubscribe/[% patron_id_hash %]/[% cardnumber %]/[% notice_id %]">
+    <h3>Email Preferences</h3>
+
+    <div class="radio">
+      <label>
+        <input type="radio" name="unsubRadios" id="unsubRadios1" value="" checked>
+        Unsubscribe from this type of email.
+      </label>
+    </div>
+
+    <div class="radio">
+      <label>
+        <input type="radio" name="unsubRadios" id="unsubRadios2" value="option2">
+        Unsubscribe from all types of bulk emails.
+        <em><strong>Note, this does not prevent you from receiving emails directed to you personally.</strong></em>
+      </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
