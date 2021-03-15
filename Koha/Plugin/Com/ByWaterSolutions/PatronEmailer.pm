@@ -6,15 +6,18 @@ use Modern::Perl;
 ## Required for all plugins
 use base qw(Koha::Plugins::Base);
 
-use File::Basename;
-use DateTime;
-use Text::CSV;
+use C4::Reports::Guided qw( execute_query );
 use Koha::Database;
 use Koha::Notice::Templates;
 use Koha::Patrons;
 use Koha::Reports;
+
+use DateTime;
+use Digest::MD5 qw(md5_hex);
+use File::Basename;
 use List::Util qw( any );
-use C4::Reports::Guided qw( execute_query );
+use Mojo::JSON qw(decode_json);
+use Text::CSV;
 
 use Template;
 use utf8;
@@ -51,6 +54,21 @@ sub new {
     my $self = $class->SUPER::new($args);
 
     return $self;
+}
+
+sub api_routes {
+    my ( $self, $args ) = @_;
+
+    my $spec_str = $self->mbf_read('openapi.json');
+    my $spec     = decode_json($spec_str);
+
+    return $spec;
+}
+
+sub api_namespace {
+    my ( $self ) = @_;
+
+    return 'patronemailer';
 }
 
 ## The existance of a 'tool' subroutine means the plugin is capable
@@ -92,6 +110,47 @@ sub uninstall() {
     return 1;
 }
 
+sub get_unsubscribe_page {
+    my ( $self, $args ) = @_;
+
+    my $cgi = CGI->new;
+    $self->{cgi} = $cgi;
+    
+    my $filename = $args->{filename};
+
+    my $template = $self->get_opac_template( { file => $filename } );
+
+    return $template;
+}
+
+## identical to Koha::Plugins::Base::get_template except type="opac"
+sub get_opac_template {
+    my ( $self, $args ) = @_;
+
+    require C4::Auth;
+
+    my $template_name = $args->{'file'} // '';
+    # if not absolute, call mbf_path, which dies if file does not exist
+    $template_name = $self->mbf_path( $template_name )
+        if $template_name !~ m/^\//;
+    my ( $template, $loggedinuser, $cookie ) = C4::Auth::get_template_and_user(
+        {   template_name   => $template_name,
+            query           => $self->{'cgi'},
+            type            => "opac",
+            authnotrequired => 1,
+        }
+    );
+    $template->param(
+        CLASS       => $self->{'class'},
+        METHOD      => scalar $self->{'cgi'}->param('method'),
+        PLUGIN_PATH => $self->get_plugin_http_path(),
+        PLUGIN_DIR  => $self->bundle_path(),
+        LANG        => C4::Languages::getlanguage($self->{'cgi'}),
+    );
+
+    return $template;
+}
+
 sub tool_step1 {
     my ( $self, $args ) = @_;
     my $cgi = $self->{'cgi'};
@@ -112,6 +171,7 @@ sub tool_step2 {
 
 
     my ( $body_template, $subject, $letter_code, $is_html );
+    my $notice;
     if( $cgi->param('use_built_in') ){
         $body_template = $self->retrieve_data('body');
         $subject       = $self->retrieve_data('subject');
@@ -122,7 +182,7 @@ sub tool_step2 {
         my $module = $cgi->param("module");
         my $letter = $cgi->param("letter");
         warn " $branchcode and $module and $letter ";
-        my $notice = Koha::Notice::Templates->find({ branchcode => $branchcode, module => $module, code => $letter });
+        $notice = Koha::Notice::Templates->find({ branchcode => $branchcode, module => $module, code => $letter });
         $body_template = $notice->content;
         $subject       = $notice->title;
         $letter_code   = $notice->code;
@@ -164,7 +224,7 @@ sub tool_step2 {
         $csv->column_names(@$column_names);
 
         while ( my $hr = $csv->getline_hr($fh_in) ) {
-            my $email = generate_email($hr, $body_template,$subject);
+            my $email = generate_email( $hr, $body_template, $subject, $notice );
             if( $email ){
                 push @to_send, $email;
             } else {
@@ -186,7 +246,7 @@ sub tool_step2 {
                 print $template->output();
                 return;
             }
-            my $email = generate_email($row, $body_template,$subject);
+            my $email = generate_email( $row, $body_template, $subject, $notice );
             if( $email ){
                 push @to_send, $email;
             } else {
@@ -208,9 +268,15 @@ sub tool_step2 {
 }
 
 sub generate_email {
-    my $line = shift;
+    my $line          = shift;
     my $body_template = shift;
-    my $subject = shift;
+    my $subject       = shift;
+    my $notice        = shift;
+
+    my $is_html    = $notice->is_html;
+    my $branchcode = $notice->branchcode || '_';
+    my $module     = $notice->module;
+    my $code       = $notice->code;
 
     my $template = Template->new({ENCODING => 'utf8'});
 
@@ -219,6 +285,20 @@ sub generate_email {
 
     my $borrower = Koha::Patrons->find( { cardnumber => $line->{cardnumber} } );
     return unless $borrower;
+
+    my $library_name = C4::Context->preference('LibraryName');
+    my $base_url = C4::Context->preference('OPACBaseURL');
+
+    my $salt = C4::Context->config('patron_emailer_salt') || '8374892734834839'; 
+    my $cardnumber = $borrower->cardnumber;
+    my $hash = md5_hex( $salt . $borrower->id );
+    my $unsubscribe_link
+        = "$base_url/api/v1/contrib/patronemailer/patrons/unsubscribe/$hash/$cardnumber/$branchcode/$module/$code";
+    if ( $is_html ) {
+		$body .= qq{<p>You received this email from $library_name.<br/>If you would like to unsubscribe, click <a href="$unsubscribe_link">here</a>.};
+    } else {
+		$body .= qq{\n\nYou received this email from $library_name.\nIf you would like to unsubscribe, open this link in a web browser: $unsubscribe_link};
+    } 
 
     my $prepped_email =
         {
@@ -229,6 +309,10 @@ sub generate_email {
             status                 => 'pending',
             to_address             => $line->{email},
             from_address           => $line->{from} || C4::Context->preference('KohaAdminEmailAddress'),
+
+            branchcode => $branchcode,
+            module => $module,
+            code => $code,
          };
     return $prepped_email;
 }
@@ -238,6 +322,9 @@ sub tool_step3 {
     my $cgi = $self->{'cgi'};
     my $template = $self->get_template( { file => 'tool-step3.tt' } );
     my @borrowernumber = $cgi->multi_param('borrowernumber');
+    my @branchcode = $cgi->multi_param('branchcode');
+    my @module = $cgi->multi_param('module');
+    my @code = $cgi->multi_param('code');
     my @subject= $cgi->multi_param('subject');
     my @content = $cgi->multi_param('content');
     my @to_address = $cgi->multi_param('to_address');
@@ -247,12 +334,17 @@ sub tool_step3 {
     my $letter_code = $cgi->param('letter_code');
     my $is_html = $cgi->param('is_html');
     for( my $i = 0; $i < @borrowernumber; $i++ ){
+        my $key = "unsub-$borrowernumber[$i]-$module[$i],$code[$i]";
+        my $key_all =  "unsub-$borrowernumber[$i]-__ALL__";
+        my $unsubscribed = $self->retrieve_data($key) || $self->retrieve_data($key_all);
+        my $status = $unsubscribed ? 'deleted' : 'pending';
+
         $message_queue_rs->create({
             borrowernumber => $borrowernumber[$i],
             subject => $subject[$i],
             content => $is_html ? _wrap_html($content[$i],$subject[$i]) : $content[$i],
             message_transport_type => $to_address[$i] ne "" ? 'email' : 'print',
-            status => 'pending',
+            status => $status,
             to_address => $to_address[$i],
             from_address => $from_address[$i],
             letter_code => $letter_code || 'PEP'

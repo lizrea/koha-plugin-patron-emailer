@@ -46,7 +46,13 @@
     <tbody>
     [% FOREACH email IN sent %]
         <tr>
-            <td>[% email.borrowernumber | html %]<input type="hidden" name="borrowernumber" value="[% email.borrowernumber | html %]" /></td>
+            <td>
+                [% email.borrowernumber | html %]
+                <input type="hidden" name="borrowernumber" value="[% email.borrowernumber | html %]" />
+                <input type="hidden" name="branchcode" value="[% email.branchcode | html %]" />
+                <input type="hidden" name="module" value="[% email.module | html %]" />
+                <input type="hidden" name="code" value="[% email.code | html %]" />
+            </td>
             <td>[% email.subject | html %]<input type="hidden" name="subject" value="[% email.subject | html %]" /></td>
             <td>[% email.content | $raw %]<input type="hidden" name="content" value="[% email.content | html %]" /></td>
             <td>[% email.to_address | html %]<input type="hidden" name="to_address" value="[% email.to_address | html %]" /></td>
