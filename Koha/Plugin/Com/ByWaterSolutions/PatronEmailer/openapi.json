@@ -1,0 +1,84 @@
+{
+  "/patrons/unsubscribe/{patron_id_hash}/{cardnumber}/{branchcode}/{module}/{code}": {
+    "get": {
+      "x-mojo-to": "Com::ByWaterSolutions::PatronEmailer::ApiController#unsubscribe",
+      "operationId": "LandingPage",
+      "tags": [
+        "patrons"
+      ],
+      "parameters": [
+        {
+          "name": "patron_id_hash",
+          "in": "path",
+          "description": "Internal salted patron data hash",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "cardnumber",
+          "in": "path",
+          "description": "Internal patron identifier",
+          "required": true,
+          "type": "integer"
+        },
+        {
+          "name": "branchcode",
+          "in": "path",
+          "description": "Branchcode for this notice",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "module",
+          "in": "path",
+          "description": "Module for this notice",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "code",
+          "in": "path",
+          "description": "Code for this notice",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "unsubscribe_type",
+          "in": "query",
+          "description": "Will unsub be for this notice code, or for all",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "produces": [
+        "text/html"
+      ],
+      "responses": {
+        "200": {
+          "description": "Patron emailer unsubscribe unsubscribe page",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "pissed": {
+                "description": "HTML of unsubscribe page",
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "An error occured",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "description": "An explanation for the error",
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
