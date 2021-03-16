@@ -18,6 +18,7 @@
 [% INCLUDE 'masthead.inc' %]
 
 <div class="main">
+ [% UNLESS unsubscribe_type %]
   <form action="/api/v1/contrib/patronemailer/patrons/unsubscribe/[% patron_id_hash | uri %]/[% cardnumber | uri %]/[% branchcode | uri%]/[% module | uri %]/[% code | uri %]">
     <h3>Email Preferences</h3>
 
@@ -38,4 +39,6 @@
 
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
+ [% ELSE %]
+  You've been unsubscribed!
 </div>
