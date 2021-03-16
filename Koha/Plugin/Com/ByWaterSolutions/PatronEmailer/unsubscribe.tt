@@ -41,4 +41,5 @@
   </form>
  [% ELSE %]
   You've been unsubscribed!
+ [% END %]
 </div>
