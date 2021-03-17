@@ -224,7 +224,7 @@ sub tool_step2 {
         $csv->column_names(@$column_names);
 
         while ( my $hr = $csv->getline_hr($fh_in) ) {
-            my $email = generate_email( $hr, $body_template, $subject, $notice );
+            my $email = generate_email( $hr, $body_template, $subject, $is_html, $notice );
             if( $email ){
                 push @to_send, $email;
             } else {
@@ -246,7 +246,7 @@ sub tool_step2 {
                 print $template->output();
                 return;
             }
-            my $email = generate_email( $row, $body_template, $subject, $notice );
+            my $email = generate_email( $row, $body_template, $subject, $is_html, $notice );
             if( $email ){
                 push @to_send, $email;
             } else {
@@ -271,12 +271,12 @@ sub generate_email {
     my $line          = shift;
     my $body_template = shift;
     my $subject       = shift;
+    my $is_html       = shift;
     my $notice        = shift;
 
-    my $is_html    = $notice->is_html;
-    my $branchcode = $notice->branchcode || '_';
-    my $module     = $notice->module;
-    my $code       = $notice->code;
+    my $branchcode = $notice ? $notice->branchcode || '_' : '_';
+    my $module     = $notice ? $notice->module            : 'BUILT_IN';
+    my $code       = $notice ? $notice->code              : 'BUILT_IN';
 
     my $template = Template->new({ENCODING => 'utf8'});
 

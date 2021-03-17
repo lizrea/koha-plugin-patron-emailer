@@ -22,12 +22,14 @@
   <form action="/api/v1/contrib/patronemailer/patrons/unsubscribe/[% patron_id_hash | uri %]/[% cardnumber | uri %]/[% branchcode | uri%]/[% module | uri %]/[% code | uri %]">
     <h3>Email Preferences</h3>
 
-    <div class="radio">
-      <label>
-        <input type="radio" name="unsubscribe_type" id="unsubscribe_type1" value="[% module %],[% code %]" checked>
-        Unsubscribe from this type of email.
-      </label>
-    </div>
+    [% IF code != 'BUILT_IN' %]
+      <div class="radio">
+        <label>
+          <input type="radio" name="unsubscribe_type" id="unsubscribe_type1" value="[% module %],[% code %]" checked>
+          Unsubscribe from this type of email.
+         </label>
+      </div>
+    [% END %]
 
     <div class="radio">
       <label>
