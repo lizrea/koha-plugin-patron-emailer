@@ -1,7 +1,7 @@
 {
   "name": "koha-plugin-patron-emailer",
-  "version": "2.1.28",
-  "previous_version": "2.1.27",
+  "version": "2.1.29",
+  "previous_version": "2.1.28",
   "description": "Koha Patron Emailer Plugin",
   "devDependencies": {
     "gulp": "^3.9.1",
