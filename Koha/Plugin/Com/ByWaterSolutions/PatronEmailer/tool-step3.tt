@@ -6,10 +6,25 @@
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'cat-search.inc' %]
 
-<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a> &rsaquo; Patron Emailer &rsaquo; Emails queued</div>
+<nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
+    <ol>
+        <li>
+            <a href="/cgi-bin/koha/mainpage.pl">Home</a>
+        </li>
+        <li>
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        </li>
+        <li>
+            Patron Emailer
+        </li>
+        <li>
+            Emails queued
+        </li>
+    </ol>
+</nav>
 
 [% IF ( sent) %]
-<div id="doc3">
+<div class="main container-fluid" id="doc3">
     Your emails have been scheduled for delivery!
 </div>
 [% END %]

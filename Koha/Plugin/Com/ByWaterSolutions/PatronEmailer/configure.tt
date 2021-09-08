@@ -6,63 +6,81 @@
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'cat-search.inc' %]
 
-<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a> &rsaquo; Patron Emailer &rsaquo; Configuration</div>
+<nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
+    <ol>
+        <li>
+            <a href="/cgi-bin/koha/mainpage.pl">Home</a>
+        </li>
+        <li>
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        </li>
+        <li>
+            Patron Emailer
+        </li>
+        <li>
+            Configuration
+        </li>
+    </ol>
+</nav>
 
-<div id="doc3">
+<div class="main container-fluid" id="doc3">
     <!-- We can access our own plugins resource files using the PLUGIN_PATH variable. -->
     <img src="[% PLUGIN_PATH %]/logo.png" />
-    <h3>Koha: Patron Emailer: Configuration</h3>
 
-    <!-- Notice our form here has no 'action', this is good, it means that our forms will always get passed back to 'plugins/run.pl'. You could hard code it instead if you prefer -->
-    <form method="get">
-        <!-- Always pass these two parameters so the plugin system knows what to execute! -->
-        <input type="hidden" name="class" value="[% CLASS | html %]"/>
-        <input type="hidden" name="method" value="[% METHOD | html %]"/>
+    <fieldset id="configs">
+        <legend>Koha: Patron Emailer: Configuration</legend>
 
-        [% IF error %]<div class="warn alert error">Error: [% error | html %]</div>[% END %]
+        <!-- Notice our form here has no 'action', this is good, it means that our forms will always get passed back to 'plugins/run.pl'. You could hard code it instead if you prefer -->
+        <form method="get">
+            <!-- Always pass these two parameters so the plugin system knows what to execute! -->
+            <input type="hidden" name="class" value="[% CLASS | html %]"/>
+            <input type="hidden" name="method" value="[% METHOD | html %]"/>
 
-        <p>
-            <label for="is_html">HTML message: </label>
-            [% IF (is_html) %]
-                <input name="is_html" type="checkbox" value="1" checked="checked"/>
-            [% ELSE %]
-                <input name="is_html" type="checkbox" value="1" />
-            [% END %]
+            [% IF error %]<div class="warn alert error">Error: [% error | html %]</div>[% END %]
 
-        </p>
-          
+            <p>
+                <label for="is_html">HTML message: </label>
+                [% IF (is_html) %]
+                    <input name="is_html" type="checkbox" value="1" checked="checked"/>
+                [% ELSE %]
+                    <input name="is_html" type="checkbox" value="1" />
+                [% END %]
 
-        <p>
-            <label for="subject">Email subject: </label>
-            <input name="subject" type="text" class="input-xxlarge" size="100" value="[% subject | html %]" />
-        </p>
+            </p>
+              
 
-        <p>
-            <label for="body">Email text: </label>
-            <br/>
-            <textarea rows="15" cols="200" name="body">[% body | html %]</textarea>
-        </p>
+            <p>
+                <label for="subject">Email subject: </label>
+                <input name="subject" type="text" class="input-xxlarge" size="100" value="[% subject | html %]" />
+            </p>
 
-        <p>
-            <label for="delimiter">Data delimiter: </label>
-            <br/>
-            <input name="delimiter" type="text" value="[% delimiter | html %]"/>
-        </p>
+            <p>
+                <label for="body">Email text: </label>
+                <br/>
+                <textarea rows="15" cols="200" name="body">[% body | html %]</textarea>
+            </p>
 
-        <p>This plugin uses Template Toolkit syntax. All the fields in the uploaded CSV file will be available.</p>
+            <p>
+                <label for="delimiter">Data delimiter: </label>
+                <br/>
+                <input name="delimiter" type="text" value="[% delimiter | html %]"/>
+            </p>
 
-        <p>Example:</p>
-        <pre>
+            <p>This plugin uses Template Toolkit syntax. All the fields in the uploaded CSV file will be available.</p>
+
+            <p>Example:</p>
+            <pre>
 [% TAGS [- -] %]
 First name: [% firstname %]
 Last name: [% lastname %]
 [- TAGS [% %] -]
-        </pre>
+            </pre>
 
 
-        <input type="hidden" name="save" value="1" />
+            <input type="hidden" name="save" value="1" />
 
-        <input type="submit" value="Save configuration" />
-    </form>
+            <input type="submit" value="Save configuration" />
+        </form>
+    </fieldset>
 
 [% INCLUDE 'intranet-bottom.inc' %]

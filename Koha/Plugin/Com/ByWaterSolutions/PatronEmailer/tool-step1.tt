@@ -8,9 +8,24 @@
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'cat-search.inc' %]
 
-<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a> &rsaquo; Patron Emailer &rsaquo; Upload file</div>
+<nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
+    <ol>
+        <li>
+            <a href="/cgi-bin/koha/mainpage.pl">Home</a>
+        </li>
+        <li>
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        </li>
+        <li>
+            Patron Emailer
+        </li>
+        <li>
+            Upload file
+        </li>
+    </ol>
+</nav>
 
-<div id="doc3">
+<div class="main container-fluid" id="doc3">
     <p>Please upload your Koha patrons CSV File</p>
 
     <form id="emailer_settings" method="post" enctype="multipart/form-data">
@@ -33,13 +48,14 @@
         <fieldset id="notice">
             <legend>Select a notice</legend>
             [% IF (subject) %]
-                <label for="use_built_in">Use notice configured in plugin</label>
-                <input id="use_built_in" type="checkbox" name="use_built_in">( [% subject | html %] )
+                <p><label for="use_built_in">Use notice configured in plugin</label>
+                <input id="use_built_in" type="checkbox" name="use_built_in">( [% subject | html %] )</p>
                 </br>
                 or
                 </br>
             [% END %]
 
+            <p>
             Select a library:
             <select id="branchcode" name="branchcode" id="branch" style="width:20em;">
                 <option value="">All libraries</option>
@@ -71,7 +87,7 @@
                     <option data-branch="[% letter.branchcode | html %]" data-module="[% letter.module | html %]" value="[% letter.code | html %]">[% letter.name | html %] ( [% Branches.GetName(letter.branchcode) || "All" | html %] | [% letter.module | html %] | [% letter.message_transport_type | html %] ) </option>
                 [% END %]
             </select>
-            </br>
+            </p>
 
         </fieldset>
         <input name="submitted" type="submit" value="Upload" />
