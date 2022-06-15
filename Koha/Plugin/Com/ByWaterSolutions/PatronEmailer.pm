@@ -45,8 +45,8 @@ sub new {
     my ( $class, $args ) = @_;
 
     ## We need to add our metadata here so our base class can access it
-    $args->{'metadata'} = $metadata;
-    $args->{'metadata'}->{'class'} = $class;
+    $args->{metadata} = $metadata;
+    $args->{metadata}->{class} = $class;
 
     ## Here, we call the 'new' method for our base class
     ## This runs some additional magic and checking
@@ -78,7 +78,7 @@ sub api_namespace {
 sub tool {
     my ( $self, $args ) = @_;
 
-    my $cgi = $self->{'cgi'};
+    my $cgi = $self->{cgi};
 
     if ( $cgi->param('patrons') || $cgi->param('report_id') ) {
         $self->tool_step2();
@@ -129,23 +129,23 @@ sub get_opac_template {
 
     require C4::Auth;
 
-    my $template_name = $args->{'file'} // '';
+    my $template_name = $args->{file} // '';
     # if not absolute, call mbf_path, which dies if file does not exist
     $template_name = $self->mbf_path( $template_name )
         if $template_name !~ m/^\//;
     my ( $template, $loggedinuser, $cookie ) = C4::Auth::get_template_and_user(
         {   template_name   => $template_name,
-            query           => $self->{'cgi'},
+            query           => $self->{cgi},
             type            => "opac",
             authnotrequired => 1,
         }
     );
     $template->param(
-        CLASS       => $self->{'class'},
-        METHOD      => scalar $self->{'cgi'}->param('method'),
+        CLASS       => $self->{class},
+        METHOD      => scalar $self->{cgi}->param('method'),
         PLUGIN_PATH => $self->get_plugin_http_path(),
         PLUGIN_DIR  => $self->bundle_path(),
-        LANG        => C4::Languages::getlanguage($self->{'cgi'}),
+        LANG        => C4::Languages::getlanguage($self->{cgi}),
     );
 
     return $template;
@@ -153,7 +153,7 @@ sub get_opac_template {
 
 sub tool_step1 {
     my ( $self, $args ) = @_;
-    my $cgi = $self->{'cgi'};
+    my $cgi = $self->{cgi};
 
     my $template = $self->get_template( { file => 'tool-step1.tt' } );
     my $letters = Koha::Notice::Templates->search( {}, { order_by=>['me.branchcode','me.module','me.name'] } );
@@ -166,7 +166,7 @@ sub tool_step1 {
 
 sub tool_step2 {
     my ( $self, $args ) = @_;
-    my $cgi = $self->{'cgi'};
+    my $cgi = $self->{cgi};
     my $template = $self->get_template( { file => 'tool-step2.tt' } );
 
 
@@ -240,7 +240,7 @@ sub tool_step2 {
         my $sql = $report->savedsql;
         my ( $sth, $errors ) = execute_query( $sql ); #don't pass offset or limit, hardcoded limit of 999,999 will be used
         while ( my $row = $sth->fetchrow_hashref() ) {
-            unless( defined $row->{'cardnumber'} ){
+            unless( defined $row->{cardnumber} ){
                 $template->param( no_cardnumber => 1 );
                 print $cgi->header("text/html;charset=UTF-8");
                 print $template->output();
@@ -319,7 +319,7 @@ sub generate_email {
 
 sub tool_step3 {
     my ( $self, $args ) = @_;
-    my $cgi = $self->{'cgi'};
+    my $cgi = $self->{cgi};
     my $template = $self->get_template( { file => 'tool-step3.tt' } );
     my @borrowernumber = $cgi->multi_param('borrowernumber');
     my @branchcode = $cgi->multi_param('branchcode');
@@ -362,7 +362,7 @@ sub tool_step3 {
 ## be split up like the 'report' method is.
 sub configure {
     my ( $self, $args ) = @_;
-    my $cgi = $self->{'cgi'};
+    my $cgi = $self->{cgi};
 
     unless ( $cgi->param('save') ) {
         my $template = $self->get_template( { file => 'configure.tt' } );
@@ -385,7 +385,7 @@ sub configure {
                 subject            => $cgi->param('subject') || "",
                 delimiter          => $cgi->param('delimiter') || "",
                 is_html            => $cgi->param('is_html') || "",
-                last_configured_by => C4::Context->userenv->{'number'},
+                last_configured_by => C4::Context->userenv->{number},
             }
         );
     }
