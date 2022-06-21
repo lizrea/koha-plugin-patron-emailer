@@ -26,7 +26,6 @@
 </nav>
 
 <div class="main container-fluid" id="doc3">
-    <p>Please upload your Koha patrons CSV File</p>
 
     <form id="emailer_settings" method="post" enctype="multipart/form-data">
         <input type="hidden" name="class" value="[% CLASS | html %]"/>
@@ -37,11 +36,12 @@
              <p><label for="patrons">Upload a file:</label>
              <input type="file" name="patrons" /></p>
              </br>
-             or
+             OR
              </br>
              <p><label for="report_id">Enter a report id:</label>
              <input type="number" name="report_id" />
              </p>
+             <p><strong>NOTE:</strong>Your file or report must provide a 'cardnumber' column to be used to find relevant Koha accounts</p>
 
         </fieldset>
 
@@ -51,7 +51,7 @@
                 <p><label for="use_built_in">Use notice configured in plugin</label>
                 <input id="use_built_in" type="checkbox" name="use_built_in">( [% subject | html %] )</p>
                 </br>
-                or
+                OR
                 </br>
             [% END %]
 
