@@ -7,7 +7,22 @@
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'cat-search.inc' %]
 
-<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a> &rsaquo; Patron Emailer &rsaquo; Emails queued</div>
+<nav id="breadcrumbs" aria-label="Breadcrumb" class="breadcrumb">
+    <ol>
+        <li>
+            <a href="/cgi-bin/koha/mainpage.pl">Home</a>
+        </li>
+        <li>
+            <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a>
+        </li>
+        <li>
+            Patron Emailer
+        </li>
+        <li>
+            Emails queued
+        </li>
+    </ol>
+</nav>
 
 [% IF ( not_found.size > 0 ) %]
     <div class="dialog alert"><p>Warning, the following cardnumbers were not found:</p></div>
@@ -23,7 +38,7 @@
     </table>
 [% END %]
 [% IF ( sent) %]
-<div id="doc3">
+<div class="main container-fluid" id="doc3">
     Here is a preview of your emails:
 </div>
 <form method="post" enctype="multipart/form-data">
