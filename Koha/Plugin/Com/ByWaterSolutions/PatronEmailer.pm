@@ -178,11 +178,8 @@ sub tool_step2 {
         $is_html       = $self->retrieve_data('is_html');
         $letter_code   = "BUILT_IN";
     } else {
-        my $branchcode = $cgi->param("branchcode");
-        my $module = $cgi->param("module");
-        my $letter = $cgi->param("letter");
-        warn " $branchcode and $module and $letter ";
-        $notice = Koha::Notice::Templates->find({ branchcode => $branchcode, module => $module, code => $letter });
+        my $letter_id = $cgi->param("letter");
+        $notice = Koha::Notice::Templates->find({ id => $letter_id });
         $body_template = $notice->content;
         $subject       = $notice->title;
         $letter_code   = $notice->code;

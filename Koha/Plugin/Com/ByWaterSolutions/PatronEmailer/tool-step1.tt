@@ -68,7 +68,7 @@
             <select id="letter" name="letter">
                 <option value="">Please choose a letter</option>
                 [% FOREACH letter IN letters %]
-                    <option data-branch="[% letter.branchcode | html %]" data-module="[% letter.module | html %]" value="[% letter.code | html %]">[% letter.name | html %] ( [% Branches.GetName(letter.branchcode) || "All" | html %] | [% letter.module | html %] | [% letter.message_transport_type | html %] ) </option>
+                    <option data-branch="[% letter.branchcode | html %]" data-module="[% letter.module | html %]" value="[% letter.id | html %]">[% letter.name | html %] ( [% Branches.GetName(letter.branchcode) || "All" | html %] | [% letter.module | html %] | [% letter.message_transport_type | html %] ) </option>
                 [% END %]
             </select>
             </br>
