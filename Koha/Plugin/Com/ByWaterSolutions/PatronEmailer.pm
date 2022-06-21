@@ -235,7 +235,13 @@ sub tool_step2 {
         my $report_id = $cgi->param("report_id");
         my $report = Koha::Reports->find( $report_id );
         my $sql = $report->savedsql;
-        my ( $sth, $errors ) = execute_query( $sql ); #don't pass offset or limit, hardcoded limit of 999,999 will be used
+        my ( $sth, $errors );
+        if ( C4::Context->preference('Version') ge '21.060000' ) {
+            ( $sth, $errors ) = execute_query({ sql =>  $sql }); #don't pass offset or limit, hardcoded limit of 999,999 will be used
+        } else {
+            ( $sth, $errors ) = execute_query( $sql ); #don't pass offset or limit, hardcoded limit of 999,999 will be used
+        }
+
         while ( my $row = $sth->fetchrow_hashref() ) {
             unless( defined $row->{cardnumber} ){
                 $template->param( no_cardnumber => 1 );
