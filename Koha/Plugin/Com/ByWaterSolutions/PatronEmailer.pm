@@ -298,9 +298,9 @@ sub generate_email {
     my $unsubscribe_link
         = "$base_url/api/v1/contrib/patronemailer/patrons/unsubscribe/$hash/$cardnumber/$branchcode/$module/$code";
     if ( $is_html ) {
-		$body .= qq{<p>You received this email from $library_name.<br/>If you would like to unsubscribe, click <a href="$unsubscribe_link">here</a>.};
+		$body .= qq{<p>You received this email from your library.<br/>If you would like to unsubscribe, click <a href="$unsubscribe_link">here</a>.};
     } else {
-		$body .= qq{\n\nYou received this email from $library_name.\nIf you would like to unsubscribe, open this link in a web browser: $unsubscribe_link};
+		$body .= qq{\n\nYou received this email from your library.\nIf you would like to unsubscribe, open this link in a web browser: $unsubscribe_link};
     } 
 
     my $prepped_email =
